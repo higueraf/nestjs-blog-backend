@@ -1,8 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Category } from '../categories/category.entity';
-import { User } from 'src/users/user.entity';
 
-@Entity('posts')
+@Entity()
 export class Post {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -13,17 +12,6 @@ export class Post {
   @Column()
   content: string;
 
-  @Column()
-  category_id: string;
-
-  @Column()
-  user_id: string;
-
-  @ManyToOne(() => Category)
-  @JoinColumn({ name: 'category_id' })
+  @ManyToOne(() => Category, { eager: true })
   category: Category;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
 }
