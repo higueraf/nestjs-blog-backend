@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { paginate, IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
 import { Repository } from 'typeorm';
 import { Post } from './post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -30,9 +31,13 @@ export class PostsService {
     return this.postsRepository.save(post);
   }
 
-  async findAll(): Promise<Post[]> {
-    return this.postsRepository.find({ relations: ['category'] });
+  async findAll(options: IPaginationOptions): Promise<Pagination<Post>> {
+    const queryBuilder = this.postsRepository.createQueryBuilder('post');
+    queryBuilder.leftJoinAndSelect('post.category', 'category');
+    return paginate<Post>(queryBuilder, options);
   }
+
+  
 
   async findOne(id: string): Promise<Post | null> {
     const post = await this.postsRepository.findOne({ where: { id }, relations: ['category'] });
