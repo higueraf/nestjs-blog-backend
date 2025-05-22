@@ -1,5 +1,5 @@
 import { paginate, IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -29,18 +29,18 @@ export class UsersService {
     return paginate<User>(queryBuilder, options);
   }
 
-  findOne(id: string) {
-    return this.userRepository.findOne({ where: { id } });
+  async findOne(id: string) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) throw new NotFoundException('User not found');
+    return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) return null;
-
+    if (!user) throw new NotFoundException('User not found');
     if (updateUserDto.password) {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
-
     Object.assign(user, updateUserDto);
     return this.userRepository.save(user);
   }
@@ -54,4 +54,12 @@ export class UsersService {
   async findByEmail(username: string) {
     return this.userRepository.findOne({ where: { username } });
   }
+
+  async updateProfile(id: string, profile: string) {
+    const user = await this.userRepository.findOne({ where: { id: id } });
+    if (!user) throw new NotFoundException('User not found');
+    user.profile = profile;
+    return this.userRepository.save(user);
+  }
+  
 }
