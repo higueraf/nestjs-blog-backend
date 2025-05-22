@@ -26,19 +26,24 @@ export class UsersController {
     return new SuccessResponseDto('Users retrieved', user);
   }
 
-  @Get()
-  async findAll(
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('isActive') isActive?: string,
-  ): Promise<SuccessResponseDto<Pagination<User>>> {
-    if (isActive !== undefined && isActive !== 'true' && isActive !== 'false') {
-      throw new BadRequestException('Invalid value for "isActive" query param. Use "true" or "false".');
-    }
-    limit = limit > 100 ? 100 : limit;
-    const users = await this.usersService.findAll({ page, limit });
-    return new SuccessResponseDto('Users retrieved', users);
+ @Get()
+async findAll(
+  @Query('page') page = 1,
+  @Query('limit') limit = 10,
+  @Query('isActive') isActive?: string,
+): Promise<SuccessResponseDto<Pagination<User>>> {
+  if (isActive !== undefined && isActive !== 'true' && isActive !== 'false') {
+    throw new BadRequestException('Invalid value for "isActive" query param. Use "true" or "false".');
   }
+  limit = limit > 100 ? 100 : limit;
+  const users = await this.usersService.findAll({
+    page,
+    limit},
+    isActive !== undefined ? isActive === 'true' : undefined,
+  );
+  return new SuccessResponseDto('Users retrieved', users);
+}
+
 
   @Get(':id')
   async findOne(@Param('id') id: string) {

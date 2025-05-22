@@ -12,7 +12,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -23,9 +23,15 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  async findAll(options: IPaginationOptions): Promise<Pagination<User>> {
+  async findAll(options: IPaginationOptions, isActive?: boolean): Promise<Pagination<User>> {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
-    return paginate<User>(queryBuilder, options);
+    if (isActive !== undefined) {
+      queryBuilder.andWhere('user.isActive = :isActive', { isActive: isActive });
+    }
+    return paginate<User>(queryBuilder, {
+      page: options.page,
+      limit: options.limit,
+    });
   }
 
   async findOne(id: string) {
@@ -55,10 +61,10 @@ export class UsersService {
   }
 
   async updateProfile(id: string, profile: string) {
-  const user = await this.userRepository.findOne({ where: { id: id } });
-  if (!user) throw new NotFoundException('User not found');
-  user.profile = profile;
-  return this.userRepository.save(user);
-}
+    const user = await this.userRepository.findOne({ where: { id: id } });
+    if (!user) throw new NotFoundException('User not found');
+    user.profile = profile;
+    return this.userRepository.save(user);
+  }
 
 }
