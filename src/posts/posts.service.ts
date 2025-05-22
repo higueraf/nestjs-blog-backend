@@ -15,36 +15,51 @@ export class PostsService {
     private categoriesRepository: Repository<Category>,
   ) {}
 
-  async create(createPostDto: CreatePostDto): Promise<Post> {
-    const category = await this.categoriesRepository.findOne({ where: { id: createPostDto.categoryId } });
+  async create(createPostDto: CreatePostDto): Promise<Post | null> {
+    try {
+      const category = await this.categoriesRepository.findOne({ where: { id: createPostDto.categoryId } });
+      if (!category) return null;
 
-    if (!category) {
-      throw new Error('Category not found');
+      const post = this.postsRepository.create({
+        title: createPostDto.title,
+        content: createPostDto.content,
+        category: category,
+      });
+
+      return await this.postsRepository.save(post);
+    } catch (err) {
+      console.error('Error creating post:', err);
+      return null;
     }
-
-    const post = this.postsRepository.create({
-      title: createPostDto.title,
-      content: createPostDto.content,
-      category: category,
-    });
-
-    return this.postsRepository.save(post);
   }
 
-  async findAll(options: IPaginationOptions): Promise<Pagination<Post>> {
-    const queryBuilder = this.postsRepository.createQueryBuilder('post');
-    queryBuilder.leftJoinAndSelect('post.category', 'category');
-    return paginate<Post>(queryBuilder, options);
+  async findAll(options: IPaginationOptions): Promise<Pagination<Post> | null> {
+    try {
+      const queryBuilder = this.postsRepository.createQueryBuilder('post');
+      queryBuilder.leftJoinAndSelect('post.category', 'category');
+      return await paginate<Post>(queryBuilder, options);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+      return null;
+    }
   }
-
-  
 
   async findOne(id: string): Promise<Post | null> {
-    const post = await this.postsRepository.findOne({ where: { id }, relations: ['category'] });
-    return post || null;
+    try {
+      return await this.postsRepository.findOne({ where: { id }, relations: ['category'] });
+    } catch (err) {
+      console.error('Error fetching post:', err);
+      return null;
+    }
   }
 
-  async remove(id: string): Promise<void> {
-    await this.postsRepository.delete(id);
+  async remove(id: string): Promise<boolean> {
+    try {
+      const result = await this.postsRepository.delete(id);
+      return result.affected !== 0;
+    } catch (err) {
+      console.error('Error deleting post:', err);
+      return false;
+    }
   }
 }

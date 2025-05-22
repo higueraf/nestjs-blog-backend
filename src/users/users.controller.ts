@@ -1,17 +1,15 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put, Delete, Body, Param, UseGuards, Query, BadRequestException, UseInterceptors, UploadedFile
+  Controller, Get, Post, Put, Delete, Body, Param,
+  Query, BadRequestException, NotFoundException,
+  UseInterceptors, UploadedFile,
+  InternalServerErrorException
 } from '@nestjs/common';
-
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { SuccessResponseDto } from 'src/common/dto/response.dto';
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { User } from './user.entity';
-import { SuccessResponseDto } from 'src/common/dto/response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 
@@ -20,57 +18,52 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  //@UseGuards(JwtAuthGuard)
-  async create(@Body() createUserDto: CreateUserDto) {
-    const user: User = await this.usersService.create(createUserDto);
-    return new SuccessResponseDto('Users retrieved', user);
+  async create(@Body() dto: CreateUserDto) {
+    const user = await this.usersService.create(dto);
+    return new SuccessResponseDto('User created successfully', user);
   }
 
- @Get()
-async findAll(
-  @Query('page') page = 1,
-  @Query('limit') limit = 10,
-  @Query('isActive') isActive?: string,
-): Promise<SuccessResponseDto<Pagination<User>>> {
-  if (isActive !== undefined && isActive !== 'true' && isActive !== 'false') {
-    throw new BadRequestException('Invalid value for "isActive" query param. Use "true" or "false".');
-  }
-  limit = limit > 100 ? 100 : limit;
-  const users = await this.usersService.findAll({
-    page,
-    limit},
-    isActive !== undefined ? isActive === 'true' : undefined,
-  );
-  return new SuccessResponseDto('Users retrieved', users);
-}
+  @Get()
+  async findAll(
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
+    @Query('isActive') isActive?: string,
+  ): Promise<SuccessResponseDto<Pagination<User>>> {
+    if (isActive !== undefined && isActive !== 'true' && isActive !== 'false') {
+      throw new BadRequestException('Invalid value for "isActive". Use "true" or "false".');
+    }
+    const result = await this.usersService.findAll({ page, limit }, isActive === 'true');
+    if (!result) throw new InternalServerErrorException('Could not retrieve users');
 
+    return new SuccessResponseDto('Users retrieved successfully', result);
+  }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const user: User = await this.usersService.findOne(id);
-    return new SuccessResponseDto('Users retrieved', user);
+    const user = await this.usersService.findOne(id);
+    if (!user) throw new NotFoundException('User not found');
+    return new SuccessResponseDto('User retrieved successfully', user);
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    const user = await this.usersService.update(id, updateUserDto);
-    return new SuccessResponseDto('Users updated Successfully', user);
+  async update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    const user = await this.usersService.update(id, dto);
+    if (!user) throw new NotFoundException('User not found');
+    return new SuccessResponseDto('User updated successfully', user);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
     const user = await this.usersService.remove(id);
-    return new SuccessResponseDto('Users deleted Successfully', user);
+    if (!user) throw new NotFoundException('User not found');
+    return new SuccessResponseDto('User deleted successfully', user);
   }
 
   @Put(':id/profile')
   @UseInterceptors(FileInterceptor('profile', {
     storage: diskStorage({
       destination: './public/profile',
-      filename: (req, file, cb) => {
-        const uniqueName = `${Date.now()}-${file.originalname}`;
-        cb(null, uniqueName);
-      }
+      filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`)
     }),
     fileFilter: (req, file, cb) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
@@ -79,15 +72,10 @@ async findAll(
       cb(null, true);
     }
   }))
-  async uploadProfile(
-    @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  async uploadProfile(@Param('id') id: string, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Profile image is required');
-    console.log(file);
     const user = await this.usersService.updateProfile(id, file.filename);
+    if (!user) throw new NotFoundException('User not found');
     return new SuccessResponseDto('Profile image updated', user);
   }
 }
-
-
