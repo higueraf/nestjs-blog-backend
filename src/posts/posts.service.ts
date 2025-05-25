@@ -19,13 +19,11 @@ export class PostsService {
     try {
       const category = await this.categoriesRepository.findOne({ where: { id: createPostDto.categoryId } });
       if (!category) return null;
-
       const post = this.postsRepository.create({
         title: createPostDto.title,
         content: createPostDto.content,
         category: category,
       });
-
       return await this.postsRepository.save(post);
     } catch (err) {
       console.error('Error creating post:', err);
@@ -52,6 +50,28 @@ export class PostsService {
       return null;
     }
   }
+
+     async update(id: string, dto: CreatePostDto): Promise<Post | null> {
+      try {
+        const post = await this.findOne(id);
+        if (!post) return null;
+  
+        if (dto.categoryId) {
+          const category = await this.categoriesRepository.findOne({ where: { id: dto.categoryId } });
+          if (!category) return null;
+          post.category = category;
+        }
+  
+        post.title = dto.title ?? post.title;
+        post.content = dto.content ?? post.content;
+  
+        return await this.postsRepository.save(post);
+      } catch (err) {
+        console.error('Error updating post:', err);
+        return null;
+      }
+    }
+  
 
   async remove(id: string): Promise<boolean> {
     try {

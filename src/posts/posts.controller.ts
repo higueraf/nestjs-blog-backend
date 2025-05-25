@@ -8,6 +8,7 @@ import {
   Query,
   NotFoundException,
   InternalServerErrorException,
+  Put,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -17,7 +18,7 @@ import { SuccessResponseDto } from 'src/common/dto/response.dto';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService,) { }
 
   @HttpPost()
   async create(@Body() createPostDto: CreatePostDto): Promise<SuccessResponseDto<PostEntity>> {
@@ -44,6 +45,16 @@ export class PostsController {
     const post = await this.postsService.findOne(id);
     if (!post) throw new NotFoundException('Post not found');
     return new SuccessResponseDto('Post retrieved successfully', post);
+  }
+
+  @Put(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() updatePostDto: CreatePostDto
+  ): Promise<SuccessResponseDto<PostEntity>> {
+    const updated = await this.postsService.update(id, updatePostDto);
+    if (!updated) throw new NotFoundException('Post not found or category not valid');
+    return new SuccessResponseDto('Post updated successfully', updated);
   }
 
   @Delete(':id')
