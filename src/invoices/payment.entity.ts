@@ -10,8 +10,8 @@ import { PaymentMethod } from './payment-method.enum';
 
 @Entity('payments')
 export class Payment {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   date: Date;

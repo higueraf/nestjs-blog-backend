@@ -22,9 +22,9 @@ import { ProductsModule } from './products/products.module';
       database: process.env.DB_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
-      //ssl: {
-        //rejectUnauthorized: false,
-      //},
+      ssl: {
+        rejectUnauthorized: false,
+      },
     }),
 
     UsersModule,
