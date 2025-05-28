@@ -1,6 +1,6 @@
 // invoice.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable } from 'typeorm';
-import { Payment } from 'src/payments/payment.entity';
+import { Payment } from './payment.entity';
 
 @Entity('invoices')
 export class Invoice {
