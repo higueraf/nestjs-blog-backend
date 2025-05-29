@@ -2,18 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { paginate, IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
-import { User } from './user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { Customer } from './customer.entity';
+import { CreateCustomerDto } from './dto/create-customer.dto';
+import { UpdateCustomerDto } from './dto/update-customer.dto';
 
 @Injectable()
-export class UsersService {
+export class CustomersService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
+    @InjectRepository(Customer)
+    private readonly userRepo: Repository<Customer>,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<User | null> {
+  async create(dto: CreateCustomerDto): Promise<Customer | null> {
     try {
       const user = this.userRepo.create(dto);
       return await this.userRepo.save(user);
@@ -23,20 +23,20 @@ export class UsersService {
     }
   }
 
-  async findAll(options: IPaginationOptions, isActive?: boolean): Promise<Pagination<User> | null> {
+  async findAll(options: IPaginationOptions, isActive?: boolean): Promise<Pagination<Customer> | null> {
     try {
       const query = this.userRepo.createQueryBuilder('user');
       if (isActive !== undefined) {
         query.where('user.isActive = :isActive', { isActive });
       }
-      return await paginate<User>(query, options);
+      return await paginate<Customer>(query, options);
     } catch (err) {
       console.error('Error retrieving users:', err);
       return null;
     }
   }
 
-  async findOne(id: string): Promise<User | null> {
+  async findOne(id: string): Promise<Customer | null> {
     try {
       return await this.userRepo.findOne({ where: { id } });
     } catch (err) {
@@ -45,16 +45,9 @@ export class UsersService {
     }
   }
 
-  async findByUsername(username: string): Promise<User | null> {
-    try {
-      return await this.userRepo.findOne({ where: { username } });
-    } catch (err) {
-      console.error('Error finding user by username:', err);
-      return null;
-    }
-  }
 
-  async update(id: string, dto: UpdateUserDto): Promise<User | null> {
+
+  async update(id: string, dto: UpdateCustomerDto): Promise<Customer | null> {
     try {
       const user = await this.findOne(id);
       if (!user) return null;
@@ -67,7 +60,7 @@ export class UsersService {
     }
   }
 
-  async remove(id: string): Promise<User | null> {
+  async remove(id: string): Promise<Customer | null> {
     try {
       const user = await this.findOne(id);
       if (!user) return null;
@@ -79,16 +72,5 @@ export class UsersService {
     }
   }
 
-  async updateProfile(id: string, filename: string): Promise<User | null> {
-    try {
-      const user = await this.findOne(id);
-      if (!user) return null;
-
-      user.profile = filename;
-      return await this.userRepo.save(user);
-    } catch (err) {
-      console.error('Error updating user profile image:', err);
-      return null;
-    }
-  }
+  
 }
