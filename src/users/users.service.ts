@@ -1,7 +1,12 @@
+import * as bcrypt from 'bcrypt';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { paginate, IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import {
+  paginate,
+  IPaginationOptions,
+  Pagination,
+} from 'nestjs-typeorm-paginate';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -10,22 +15,29 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  async create(dto: CreateUserDto): Promise<User | null> {
+  async create(createUserDto: CreateUserDto): Promise<User | null> {
     try {
-      const user = this.userRepo.create(dto);
-      return await this.userRepo.save(user);
+      const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+      const user = this.userRepository.create({
+        ...createUserDto,
+        password: hashedPassword,
+      });
+      return await this.userRepository.save(user);
     } catch (err) {
       console.error('Error creating user:', err);
       return null;
     }
   }
 
-  async findAll(options: IPaginationOptions, isActive?: boolean): Promise<Pagination<User> | null> {
+  async findAll(
+    options: IPaginationOptions,
+    isActive?: boolean,
+  ): Promise<Pagination<User> | null> {
     try {
-      const query = this.userRepo.createQueryBuilder('user');
+      const query = this.userRepository.createQueryBuilder('user');
       if (isActive !== undefined) {
         query.where('user.isActive = :isActive', { isActive });
       }
@@ -38,7 +50,7 @@ export class UsersService {
 
   async findOne(id: string): Promise<User | null> {
     try {
-      return await this.userRepo.findOne({ where: { id } });
+      return await this.userRepository.findOne({ where: { id } });
     } catch (err) {
       console.error('Error finding user:', err);
       return null;
@@ -47,20 +59,24 @@ export class UsersService {
 
   async findByUsername(username: string): Promise<User | null> {
     try {
-      return await this.userRepo.findOne({ where: { username } });
+      return await this.userRepository.findOne({ where: { username } });
     } catch (err) {
       console.error('Error finding user by username:', err);
       return null;
     }
   }
 
-  async update(id: string, dto: UpdateUserDto): Promise<User | null> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User | null> {
     try {
-      const user = await this.findOne(id);
+      const user = await this.userRepository.findOne({ where: { id } });
       if (!user) return null;
 
-      Object.assign(user, dto);
-      return await this.userRepo.save(user);
+      if (updateUserDto.password) {
+        updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+      }
+
+      Object.assign(user, updateUserDto);
+      return this.userRepository.save(user);
     } catch (err) {
       console.error('Error updating user:', err);
       return null;
@@ -72,7 +88,7 @@ export class UsersService {
       const user = await this.findOne(id);
       if (!user) return null;
 
-      return await this.userRepo.remove(user);
+      return await this.userRepository.remove(user);
     } catch (err) {
       console.error('Error deleting user:', err);
       return null;
@@ -85,7 +101,7 @@ export class UsersService {
       if (!user) return null;
 
       user.profile = filename;
-      return await this.userRepo.save(user);
+      return await this.userRepository.save(user);
     } catch (err) {
       console.error('Error updating user profile image:', err);
       return null;

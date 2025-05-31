@@ -10,6 +10,12 @@ export class InvoiceItem {
   id: string;
 
   @Column()
+  quantity: number;
+
+  @Column()
+  unit_price: number;
+
+  @Column()
   subtotal: number;
 
    @ManyToOne(() => Invoice, { eager: true })

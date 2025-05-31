@@ -8,13 +8,14 @@ import {
   ArrayMinSize,
   IsArray,
   IsInt,
+  IsDate,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 class InvoiceItemDto {
   @IsOptional()
   @IsInt()
-  id?: number;
+  id?: string;
 
   @IsNotEmpty()
   @IsString()
@@ -29,14 +30,16 @@ class InvoiceItemDto {
   price: number;
 }
 
+import { PaymentDto } from './payment.dto';
+
 export class CreateInvoiceDto {
   @IsNotEmpty()
   @IsString()
-  customer: string;
+  customerId: string;
 
   @IsNotEmpty()
-  @IsDateString()
-  date: string;
+  @IsDate()
+  date: Date;
 
   @IsNotEmpty()
   @IsNumber()
@@ -50,6 +53,8 @@ export class CreateInvoiceDto {
 
   @IsOptional()
   @IsArray()
-  @IsInt({ each: true })
-  paymentIds?: number[];
+  @ValidateNested({ each: true })
+  @Type(() => PaymentDto)
+  payments?: PaymentDto[];
 }
+

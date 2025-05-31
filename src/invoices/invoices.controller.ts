@@ -42,7 +42,7 @@ export class InvoicesController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', ParseIntPipe) id: number): Promise<SuccessResponseDto<Invoice>> {
+  async findOne(@Param('id', ParseIntPipe) id: string): Promise<SuccessResponseDto<Invoice>> {
     const invoice = await this.invoicesService.findOne(id);
     if (!invoice) throw new NotFoundException('Invoice not found');
     return new SuccessResponseDto('Invoice retrieved successfully', invoice);
@@ -50,7 +50,7 @@ export class InvoicesController {
 
   @Put(':id')
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: string,
     @Body() updateInvoiceDto: CreateInvoiceDto
   ): Promise<SuccessResponseDto<Invoice>> {
     const updated = await this.invoicesService.update(id, updateInvoiceDto);
@@ -59,7 +59,7 @@ export class InvoicesController {
   }
 
   @Delete(':id')
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<SuccessResponseDto<number>> {
+  async remove(@Param('id', ParseIntPipe) id: string): Promise<SuccessResponseDto<string>> {
     const deleted = await this.invoicesService.remove(id);
     if (!deleted) throw new NotFoundException('Invoice not found or could not be deleted');
     return new SuccessResponseDto('Invoice deleted successfully', id);

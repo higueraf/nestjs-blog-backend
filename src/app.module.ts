@@ -10,6 +10,8 @@ import { MailModule } from './mail/mail.module';
 import { ProductsModule } from './products/products.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CustomersModule } from './customers/customers.module';
+import { InvoicesModule } from './invoices/invoices.module';
 
 
 @Module({
@@ -31,6 +33,8 @@ import { AppService } from './app.service';
 
     UsersModule,
     CategoriesModule,
+    CustomersModule,
+    InvoicesModule,
     PostsModule,
     AuthModule,
     MailModule,
