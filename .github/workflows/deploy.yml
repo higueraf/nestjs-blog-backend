@@ -1,4 +1,4 @@
-name: 🚀 Deploy NestJS to VPS
+name: 🚀 Deploy NestJS Blog Backend API to VPS
 
 on:
   push:
@@ -9,28 +9,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout código
+    - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Copiar proyecto al VPS
+    - name: Copy project to VPS
       uses: appleboy/scp-action@v0.1.3
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_KEY }}
-        port: 22
         source: "."
-        target: "/home/${{ secrets.VPS_USER }}/app"
+        target: "/root/nestjs-blog-backend"
 
-    - name: Ejecutar comandos en el VPS
+    - name: Run deploy commands on VPS
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.VPS_HOST }}
         username: ${{ secrets.VPS_USER }}
         key: ${{ secrets.VPS_KEY }}
-        port: 22
         script: |
-          cd /home/${{ secrets.VPS_USER }}/app
+          cd /root/nestjs-blog-backend
           echo "$${{ secrets.ENV_FILE }}" > .env
           npm install
           npm run build
