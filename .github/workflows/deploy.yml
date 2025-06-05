@@ -32,4 +32,4 @@ jobs:
           echo "$${{ secrets.ENV_FILE }}" > .env
           npm install
           npm run build
-          pm2 restart nest-app || pm2 start dist/main.js --name nest-app
+          pm2 restart nestjs-blog-backend-api || pm2 start dist/main.js --name nestjs-blog-backend-api

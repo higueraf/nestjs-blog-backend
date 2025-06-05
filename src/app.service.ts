@@ -5,7 +5,7 @@ export class AppService {
   getHealth(): { service: string; version: string, status: boolean } {
     return {
       service: 'nestjs-blog-backend-api',
-      version: '0.0.1',
+      version: '0.0.2',
       status: true,
     };
   }
