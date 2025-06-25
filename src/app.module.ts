@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
-
+import { MongooseModule } from '@nestjs/mongoose';  // Importar Mongoose
+import { TypeOrmModule } from '@nestjs/typeorm';  // Importar TypeOrm
+import { ConfigModule } from '@nestjs/config';  // Importar ConfigModule
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PostsModule } from './posts/posts.module';
@@ -12,11 +12,16 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { CustomersModule } from './customers/customers.module';
 import { InvoicesModule } from './invoices/invoices.module';
-
+import { CursosModule } from './cursos/cursos.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot(),  // Cargar variables de entorno
+
+    // Conexión a MongoDB (Mongoose)
+    MongooseModule.forRoot(process.env.MONGO_URI || ''),
+
+    // Conexión a PostgreSQL (TypeORM)
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
@@ -25,10 +30,8 @@ import { InvoicesModule } from './invoices/invoices.module';
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-      ssl: {
-        rejectUnauthorized: false,
-      },
+      //synchronize: true,
+      ssl: { rejectUnauthorized: false },
     }),
 
     UsersModule,
@@ -39,6 +42,7 @@ import { InvoicesModule } from './invoices/invoices.module';
     AuthModule,
     MailModule,
     ProductsModule,
+    CursosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
