@@ -1,62 +1,53 @@
-import { Schema, Document, Types } from 'mongoose';
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+import { Contenido } from './contenido.schema';
 
-export interface Contenido extends Document {
-  _id: Types.ObjectId;
-  titulo: string;
-  duracion: number;
-  descripcion: string;
-  tipo: string;
-  enlace: string;
-  dificultad: string;
-  fecha_publicacion: Date;
-  completado: boolean;
-  tiempo_estimado: string;
-  video_id: string;
-}
-
-export interface Curso extends Document {
-  _id: Types.ObjectId;
+@Schema({ timestamps: true })
+export class Curso extends Document {
+  @Prop({ required: true })
   nombre: string;
+
+  @Prop({ required: true })
   descripcion: string;
+
+  @Prop({ required: true })
   categoria: string;
+
+  @Prop({ required: true })
   fecha_inicio: Date;
+
+  @Prop({ required: true })
   fecha_fin: Date;
+
+  @Prop({ required: true })
   nivel: string;
+
+  @Prop({ required: true, default: [] })
   requisitos: string[];
+
+  @Prop({ required: true })
   precio: number;
-  instructor: { nombre: string; email: string };
+
+  @Prop({
+    type: {
+      nombre: { type: String, required: true },
+      email: { type: String, required: true }
+    },
+    required: true
+  })
+  instructor: {
+    nombre: string;
+    email: string;
+  };
+
+  @Prop({ required: true, default: 0 })
   calificacion_promedio: number;
+
+  @Prop({ required: true, default: 'activo' })
   estado: string;
-  contenidos: Contenido[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'Contenido', default: [] })
+  contenidos: Types.ObjectId[];
 }
 
-export const ContenidoSchema = new Schema<Contenido>({
-  titulo: { type: String, required: true },
-  duracion: { type: Number, required: true },
-  descripcion: { type: String, required: true },
-  tipo: { type: String, required: true },
-  enlace: { type: String, required: true },
-  dificultad: { type: String, required: true },
-  fecha_publicacion: { type: Date, required: true },
-  completado: { type: Boolean, required: true },
-  tiempo_estimado: { type: String, required: true },
-  video_id: { type: String, required: true },
-});
-
-export const CursoSchema = new Schema<Curso>({
-  nombre: { type: String, required: true },
-  descripcion: { type: String, required: true },
-  categoria: { type: String, required: true },
-  fecha_inicio: { type: Date, required: true },
-  fecha_fin: { type: Date, required: true },
-  nivel: { type: String, required: true },
-  requisitos: { type: [String], required: true },
-  precio: { type: Number, required: true },
-  instructor: {
-    nombre: { type: String, required: true },
-    email: { type: String, required: true },
-  },
-  calificacion_promedio: { type: Number, required: true },
-  estado: { type: String, required: true },
-  contenidos: { type: [ContenidoSchema], required: true },
-});
+export const CursoSchema = SchemaFactory.createForClass(Curso);

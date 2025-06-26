@@ -1,46 +1,62 @@
-import { IsString, IsArray, IsNotEmpty, IsEmail, IsDate, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsString, IsNumber, IsArray, IsDateString, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { CreateContenidoDto } from './create-contenido.dto';
 
-export class CreateCursoDto {
-  @IsString()
+class InstructorDto {
   @IsNotEmpty()
+  @IsString()
   nombre: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
+  email: string;
+}
+
+export class CreateCursoDto {
+  @IsNotEmpty()
+  @IsString()
+  nombre: string;
+
+  @IsNotEmpty()
+  @IsString()
   descripcion: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   categoria: string;
 
-  @IsDate()
+  @IsNotEmpty()
+  @IsDateString()
   fecha_inicio: Date;
 
-  @IsDate()
+  @IsNotEmpty()
+  @IsDateString()
   fecha_fin: Date;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   nivel: string;
 
   @IsArray()
-  @IsNotEmpty()
+  @IsString({ each: true })
   requisitos: string[];
 
+  @IsNotEmpty()
   @IsNumber()
   precio: number;
 
-  @IsNotEmpty()
-  instructor: { nombre: string; email: string };
+  @ValidateNested()
+  @Type(() => InstructorDto)
+  instructor: InstructorDto;
 
   @IsNumber()
-  calificacion_promedio: number;
+  calificacion_promedio?: number;
 
   @IsString()
-  @IsNotEmpty()
-  estado: string;
+  estado?: string;
 
   @IsArray()
-  @IsNotEmpty()
-  contenidos: any[];  // Contenidos se maneja como un arreglo genérico
+  @ValidateNested({ each: true })
+  @Type(() => CreateContenidoDto)
+  contenidos: CreateContenidoDto[];
 }

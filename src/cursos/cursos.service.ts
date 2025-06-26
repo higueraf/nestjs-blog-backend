@@ -1,76 +1,130 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Curso, Contenido } from './schemas/curso.schema';
+import { Curso } from './schemas/curso.schema';
+import { Contenido } from './schemas/contenido.schema';
 import { CreateCursoDto } from './dto/create-curso.dto';
 
 @Injectable()
 export class CursosService {
-  constructor(@InjectModel('Curso') private readonly cursoModel: Model<Curso>) {}
+  constructor(
+    @InjectModel(Curso.name) private readonly cursoModel: Model<Curso>,
+    @InjectModel(Contenido.name) private readonly contenidoModel: Model<Contenido>,
+  ) {}
 
-  async create(createCursoDto: CreateCursoDto): Promise<Curso> {
-    const newCurso = new this.cursoModel(createCursoDto);
-    return await newCurso.save();
-  }
+  async create(dto: CreateCursoDto): Promise<Curso | null> {
+    try {
+      const { contenidos, ...cursoData } = dto;
+      const curso = new this.cursoModel(cursoData);
 
-  async findAll(): Promise<Curso[]> {
-    return this.cursoModel.find().exec();
-  }
+      if (contenidos && contenidos.length > 0) {
+        const contenidosIds: Types.ObjectId[] = [];
 
-  async findOne(id: string): Promise<Curso> {
-    const curso = await this.cursoModel.findById(id).exec();
-    if (!curso) {
-      throw new NotFoundException('Curso no encontrado');
-    }
-    return curso;
-  }
-
-  async update(id: string, updateCursoDto: CreateCursoDto): Promise<Curso> {
-    const curso = await this.findOne(id);
-    if (!curso) throw new NotFoundException('Curso no encontrado');
-    
-    const { contenidos } = updateCursoDto;
-
-    if (contenidos) {
-      for (const contenido of curso.contenidos) {
-        const contenidoExistente = contenidos.find(
-          (newContenido) => newContenido._id.toString() === contenido._id.toString()
-        );
-        if (!contenidoExistente) {
-          await this.removeContenido(curso._id.toString(), contenido._id.toString());
+        // Crear los contenidos uno por uno
+        for (const contenido of contenidos) {
+          // Filtramos solo los campos necesarios para `Contenido`
+          const contenidoData = {
+            titulo: contenido.titulo,
+            duracion: contenido.duracion,
+            descripcion: contenido.descripcion,
+            tipo: contenido.tipo,
+            enlace: contenido.enlace,
+            dificultad: contenido.dificultad,
+            fecha_publicacion: contenido.fecha_publicacion,
+            completado: contenido.completado,
+            tiempo_estimado: contenido.tiempo_estimado,
+            video_id: contenido.video_id,
+          };
+          let contenidoEntity: Contenido;
+          try {
+            contenidoEntity = new this.contenidoModel(contenidoData);
+            contenidoEntity.save();
+            contenidosIds.push(contenidoEntity._id as Types.ObjectId);  // Especificamos que _id es un ObjectId
+          } catch (error) {
+            console.error('Error al crear contenido:', error);
+          }
         }
-      }
-
-      for (const contenidoDto of contenidos) {
-        const contenidoExistente = curso.contenidos.find(
-          (contenido) => contenido._id.toString() === contenidoDto._id?.toString()
-        );
+        curso.contenidos = contenidosIds;
         
-        if (contenidoExistente) {
-          Object.assign(contenidoExistente, contenidoDto);
-        } else {
-          curso.contenidos.push(contenidoDto);
-        }
       }
+      const savedCurso = await curso.save();
+      return savedCurso;
+    } catch (err) {
+      console.error('Error creando curso:', err);
+      return null;
     }
-
-    Object.assign(curso, updateCursoDto);
-
-    await this.cursoModel.findByIdAndUpdate(id, curso, { new: true });
-    return curso;
   }
 
-  private async removeContenido(cursoId: string, contenidoId: string): Promise<void> {
-    await this.cursoModel.updateOne(
-      { _id: cursoId },
-      { $pull: { contenidos: { _id: new Types.ObjectId(contenidoId) } } }
-    );
+  async findAll(options: { page: number, limit: number }): Promise<any | null> {
+    try {
+      const { page, limit } = options;
+      const cursos = await this.cursoModel.find()
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .populate('contenidos');
+
+      return { cursos, page, limit };
+    } catch (err) {
+      console.error('Error retrieving courses:', err);
+      return null;
+    }
   }
 
-  async remove(id: string): Promise<Curso> {
-    const curso = await this.findOne(id);
-    if (!curso) throw new NotFoundException('Curso no encontrado');
-    await this.cursoModel.findByIdAndDelete(id);
-    return curso
+  async findOne(id: string): Promise<Curso | null> {
+    try {
+      return await this.cursoModel.findById(id).populate('contenidos');
+    } catch (err) {
+      console.error('Error finding course:', err);
+      return null;
+    }
+  }
+
+  async update(id: string, dto: CreateCursoDto): Promise<Curso | null> {
+    try {
+      const curso = await this.findOne(id);
+      if (!curso) return null;
+
+      // Actualizar los campos del curso
+      Object.assign(curso, dto);
+
+      if (dto.contenidos) {
+        // Crear los contenidos y los asociamos con el curso
+        const contenidosIds: Types.ObjectId[] = [];
+        for (const contenido of dto.contenidos) {
+          const contenidoData = {
+            titulo: contenido.titulo,
+            duracion: contenido.duracion,
+            descripcion: contenido.descripcion,
+            tipo: contenido.tipo,
+            enlace: contenido.enlace,
+            dificultad: contenido.dificultad,
+            fecha_publicacion: contenido.fecha_publicacion,
+            completado: contenido.completado,
+            tiempo_estimado: contenido.tiempo_estimado,
+            video_id: contenido.video_id,
+          };
+
+          const contenidoEntity = await this.contenidoModel.create(contenidoData);
+          contenidosIds.push(contenidoEntity._id as Types.ObjectId);
+        }
+        curso.contenidos = contenidosIds;
+      }
+      return await curso.save();
+    } catch (err) {
+      console.error('Error updating course:', err);
+      return null;
+    }
+  }
+
+  async remove(id: string): Promise<Curso | null> {
+    try {
+      const curso = await this.findOne(id);
+      if (!curso) return null;
+
+      return await curso.deleteOne();  // Cambié de `remove` a `deleteOne`
+    } catch (err) {
+      console.error('Error deleting course:', err);
+      return null;
+    }
   }
 }
