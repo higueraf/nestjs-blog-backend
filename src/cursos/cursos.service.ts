@@ -63,7 +63,7 @@ export class CursosService {
         .limit(limit)
         .populate('contenidos');
 
-      return { cursos, page, limit };
+      return { items: cursos, page, limit };
     } catch (err) {
       console.error('Error retrieving courses:', err);
       return null;
