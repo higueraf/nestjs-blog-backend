@@ -50,10 +50,10 @@ export class CreateCursoDto {
   instructor: InstructorDto;
 
   @IsNumber()
-  calificacion_promedio?: number;
+  calificacion_promedio?: number = 0;
 
   @IsString()
-  estado?: string;
+  estado?: string = 'Pendiente';
 
   @IsArray()
   @ValidateNested({ each: true })

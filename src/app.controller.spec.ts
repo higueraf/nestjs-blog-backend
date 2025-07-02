@@ -14,9 +14,13 @@ describe('AppController', () => {
     appController = app.get<AppController>(AppController);
   });
 
-  describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+  describe('getHealth', () => {
+    it('should return the service health info', () => {
+      expect(appController.getHealth()).toEqual({
+        service: 'nestjs-blog-backend-api',
+        version: '0.0.3',
+        status: true,
+      });
     });
   });
 });

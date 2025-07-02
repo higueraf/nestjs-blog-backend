@@ -40,10 +40,10 @@ export class Curso extends Document {
     email: string;
   };
 
-  @Prop({ required: true, default: 0 })
+  @Prop({ default: 0 })
   calificacion_promedio: number;
 
-  @Prop({ required: true, default: 'activo' })
+  @Prop({ required: true, default: 'Activo' })
   estado: string;
 
   @Prop({ type: [Types.ObjectId], ref: 'Contenido', default: [] })
