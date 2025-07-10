@@ -29,7 +29,19 @@ jobs:
         key: ${{ secrets.VPS_KEY }}
         script: |
           cd /root/nestjs-blog-backend
+          
+          # Matar el proceso que está usando el puerto 3000
+          echo "Matar proceso en el puerto 3000..."
+          sudo lsof -t -i:3000 | xargs sudo kill -9  # Mata el proceso que usa el puerto 3000
+          
+          # Asegúrate de que el archivo .env se copie correctamente
           echo -e "${{ secrets.ENV_FILE }}" > .env
+          
+          # Instalar dependencias, construir y reiniciar la aplicación
           npm install
           npm run build
-          pm2 restart nestjs-blog-backend-api || pm2 start dist/main.js --name nestjs-blog-backend-api
+          
+          # Reiniciar PM2 con el nuevo código
+          pm2 stop nestjs-blog-backend-api || true  # Detener el proceso si está en ejecución
+          pm2 delete nestjs-blog-backend-api || true  # Eliminar el proceso si ya está activo
+          pm2 start dist/main.js --name nestjs-blog-backend-api  # Iniciar el proceso desde el archivo compilado
