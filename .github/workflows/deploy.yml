@@ -29,9 +29,7 @@ jobs:
         key: ${{ secrets.VPS_KEY }}
         script: |
           cd /root/nestjs-blog-backend
-          echo "${{ secrets.ENV_FILE }}" > .env
-          # Si tienes saltos de línea en la variable ENV_FILE, usa un heredoc
-          # echo -e "${{ secrets.ENV_FILE }}" > .env
+          echo -e "${{ secrets.ENV_FILE }}" > .env
           npm install
           npm run build
           pm2 restart nestjs-blog-backend-api || pm2 start dist/main.js --name nestjs-blog-backend-api
