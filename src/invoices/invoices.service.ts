@@ -10,8 +10,8 @@ import { Invoice } from './invoice.entity';
 import { InvoiceItem } from './invoice-item.entity';
 import { Payment } from './payment.entity';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { Customer } from 'src/customers/customer.entity';
-import { Product } from 'src/products/products.entity';
+import { Customer } from '../customers/customer.entity';
+import { Product } from '../products/products.entity';
 import { PaymentDto } from './dto/payment.dto';
 
 @Injectable()

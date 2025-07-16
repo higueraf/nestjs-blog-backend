@@ -5,7 +5,7 @@ import {
   Column,
   ManyToMany,
 } from 'typeorm';
-import { Invoice } from 'src/invoices/invoice.entity';
+import { Invoice } from '../invoices/invoice.entity';
 import { PaymentMethod } from './payment-method.enum';
 
 @Entity('payments')

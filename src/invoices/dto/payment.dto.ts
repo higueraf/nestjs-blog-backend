@@ -1,4 +1,4 @@
-// src/invoices/dto/payment.dto.ts
+// ../invoices/dto/payment.dto.ts
 import {
   IsNotEmpty,
   IsNumber,

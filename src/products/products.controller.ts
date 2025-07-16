@@ -14,7 +14,7 @@ import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product as ProductEntity } from './products.entity';
 import { Pagination } from 'nestjs-typeorm-paginate';
-import { SuccessResponseDto } from 'src/common/dto/response.dto';
+import { SuccessResponseDto } from '../common/dto/response.dto';
 
 @Controller('products')
 export class ProductsController {

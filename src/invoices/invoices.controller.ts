@@ -15,7 +15,7 @@ import { InvoicesService } from './invoices.service';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { Invoice } from './invoice.entity';
 import { Pagination } from 'nestjs-typeorm-paginate';
-import { SuccessResponseDto } from 'src/common/dto/response.dto';
+import { SuccessResponseDto } from '../common/dto/response.dto';
 
 @Controller('invoices')
 export class InvoicesController {
