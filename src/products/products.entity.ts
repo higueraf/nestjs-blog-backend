@@ -18,10 +18,14 @@ export class Product {
   @Column()
   ean_code: string;
 
-  @Column()
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   unit_price: number;
+
 
 
   @ManyToOne(() => Category, { eager: true })
   category: Category;
+
+  @Column({ nullable: true })
+  photo: string;
 }

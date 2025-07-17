@@ -19,7 +19,7 @@ export class AuthService {
       if (!user) return null;
       const isValid = await bcrypt.compare(loginDto.password, user.password);
       if (!isValid) return null;
-      const payload = { id: user.id, username: user.username };
+      const payload = { id: user.id, username: user.username, role: user.role };
       return this.jwtService.sign(payload);
     } catch (err) {
       console.error('Unexpected login error:', err);

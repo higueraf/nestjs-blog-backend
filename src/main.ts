@@ -11,6 +11,6 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalHttpExceptionFilter());
   app.useStaticAssets(join(__dirname, '..', 'public')); // 👈 Habilita acceso público a /public
   app.enableCors();
-  await app.listen(3000);
+  await app.listen(2999);
 }
 bootstrap();

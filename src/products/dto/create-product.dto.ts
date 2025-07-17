@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsUUID, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsUUID, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateProductDto {
   @IsString()
@@ -21,9 +21,11 @@ export class CreateProductDto {
   @IsNotEmpty()
   ean_code: string;
 
+  @IsOptional()
+  @IsString()
+  photo?: string;
+
   @IsNumber()
   @IsNotEmpty()
   unit_price: number;
-
-
 }

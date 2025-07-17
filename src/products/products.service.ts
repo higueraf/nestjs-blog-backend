@@ -26,6 +26,7 @@ export class ProductsService {
         ean_code: createProductDto.ean_code,
         unit_price: createProductDto.unit_price,
         category: category,
+        photo: createProductDto.photo,
       });
       return await this.productsRepository.save(product);
     } catch (err) {
@@ -70,7 +71,7 @@ export class ProductsService {
         product.upc_code = dto.upc_code ?? product.upc_code;
         product.ean_code = dto.ean_code ?? product.ean_code;
         product.unit_price = dto.unit_price ?? product.unit_price;
-  
+        if (dto.photo) product.photo = dto.photo;  
         return await this.productsRepository.save(product);
       } catch (err) {
         console.error('Error updating product:', err);

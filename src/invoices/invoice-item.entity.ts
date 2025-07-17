@@ -4,7 +4,7 @@ import { Payment } from './payment.entity';
 import { Product } from '../products/products.entity';
 import { Invoice } from './invoice.entity';
 
-@Entity('invoices')
+@Entity('invoice_items')
 export class InvoiceItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
