@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';  // Importar Mongoose
-import { TypeOrmModule } from '@nestjs/typeorm';  // Importar TypeOrm
-import { ConfigModule } from '@nestjs/config';  // Importar ConfigModule
+import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { CategoriesModule } from './categories/categories.module';
 import { PostsModule } from './posts/posts.module';
@@ -13,6 +13,8 @@ import { AppService } from './app.service';
 import { CustomersModule } from './customers/customers.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { CursosModule } from './cursos/cursos.module';
+import { BrandsModule } from 'brands/brands.module';
+import { VehiclesModule } from 'vehicles/vehicles.module';
 
 @Module({
   imports: [
@@ -30,10 +32,9 @@ import { CursosModule } from './cursos/cursos.module';
       password: process.env.DB_PASS,
       database: process.env.DB_NAME,
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      //synchronize: true,
+      synchronize: true,
       ssl: { rejectUnauthorized: false },
     }),
-
     UsersModule,
     CategoriesModule,
     CustomersModule,
@@ -43,6 +44,8 @@ import { CursosModule } from './cursos/cursos.module';
     MailModule,
     ProductsModule,
     CursosModule,
+    BrandsModule,
+    VehiclesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
